@@ -98,6 +98,8 @@ echo.
 echo 			1: DHCP
 echo 			2: 192.168.12.22
 echo 			3: 169.254.1.2
+echo			4: 192.168.12.22 (no gateway)
+echo			5: 192.168.5.22
 echo 			m: manual
 echo 			t: manual 2 addresses
 echo 			n: manual DNS
@@ -107,7 +109,7 @@ echo 			p: ping
 echo 			r: refresh
 echo 			c: change network interface
 echo 			q: quit
-choice /C 123qrdemptnc /N
+choice /C 123qrdemptnc4 /N
 if %ERRORLEVEL% == 1 goto dhcp
 if %ERRORLEVEL% == 2 goto 12
 if %ERRORLEVEL% == 3 goto 169
@@ -120,6 +122,8 @@ if %ERRORLEVEL% == 9 goto ping
 if %ERRORLEVEL% == 10 goto twee
 if %ERRORLEVEL% == 11 goto dns
 if %ERRORLEVEL% == 12 goto set_interface
+if %ERRORLEVEL% == 13 goto 12nogate
+if %ERRORLEVEL% == 14 goto 5
 
 goto end
 
@@ -130,11 +134,21 @@ goto waiting
 
 :12
 netsh interface ip set address %interface% static 192.168.12.22 255.255.255.0 192.168.12.1
-netsh interface ip set dns %interface% static 192.168.12.1
+netsh interface ip set dnsservers %interface% static 192.168.12.1 validate=no
+netsh interface ip add dnsservers %interface% 8.8.8.8 index=2 validate=no
 goto waiting
 
 :169
 netsh interface ip set address %interface% static 169.254.1.2 255.255.255.0 169.254.1.1
+netsh interface ip set dnsservers %interface% static 169.254.1.1 validate=no
+goto waiting
+
+:12nogate
+netsh interface ip set address %interface% static 192.168.12.22 255.255.255.0
+goto waiting
+
+:5
+netsh interface ip set address %interface% static 192.168.5.22 255.255.255.0
 goto waiting
 
 :manual
@@ -148,7 +162,7 @@ goto waiting
 set /p "DNS1=DNS 1:"
 set /p "DNS2=DNS 2:"
 netsh interface ip set dnsservers %interface% static %DNS1% validate=no
-netsh interface ip add dnsservers %interface% %DNS2% index=2
+netsh interface ip add dnsservers %interface% %DNS2% index=2 validate=no
 goto waiting
 
 :twee
@@ -162,8 +176,8 @@ netsh interface ip add address %interface% %ip2% %mask2%
 goto waiting
 
 :ping
-set /p "ping=IP to ping:"
-echo Trying to ping %ip%
+set /p "ping=IP to ping: "
+echo Trying to ping %ping%
 ping -n 1 %ping% | findstr /r /c:"[0-9] *ms" >nul
 if %errorlevel% == 0 echo [32mPing successfull[0m
 if %errorlevel% gtr 0 echo [31mPing failed[0m
