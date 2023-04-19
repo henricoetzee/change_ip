@@ -98,8 +98,8 @@ echo.
 echo 			1: DHCP
 echo 			2: 192.168.12.22
 echo 			3: 169.254.1.2
-echo			4: 192.168.12.22 (no gateway)
-echo			5: 192.168.5.22
+echo 			4: 192.168.12.22 (no gateway)
+echo 			5: 192.168.5.22
 echo 			m: manual
 echo 			t: manual 2 addresses
 echo 			n: manual DNS
@@ -109,7 +109,7 @@ echo 			p: ping
 echo 			r: refresh
 echo 			c: change network interface
 echo 			q: quit
-choice /C 123qrdemptnc4 /N
+choice /C 123qrdemptnc45 /N
 if %ERRORLEVEL% == 1 goto dhcp
 if %ERRORLEVEL% == 2 goto 12
 if %ERRORLEVEL% == 3 goto 169
